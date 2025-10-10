@@ -25,7 +25,7 @@ export default async function BookmarksPage() {
 
   // Get vote counts and comment counts for each job
   const jobsWithCounts = await Promise.all(
-    jobs.map(async (job) => {
+    jobs.map(async (job: any) => {
       if (!job) return null
 
       const { data: votes } = await supabase
