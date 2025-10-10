@@ -88,7 +88,7 @@ export default async function BookmarksPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">My Bookmarks</h1>
           <p className="mt-2 text-gray-600">
-            Jobs you've bookmarked for later review
+            Jobs you&apos;ve bookmarked for later review
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export default async function BookmarksPage() {
                 No bookmarks yet
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                Start bookmarking jobs you're interested in to see them here.
+                Start bookmarking jobs you&apos;re interested in to see them here.
               </p>
               <div className="mt-6">
                 <Link

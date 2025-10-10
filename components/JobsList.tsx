@@ -177,7 +177,7 @@ export function JobsList({
 
       {!hasMore && jobs.length > 0 && (
         <div className="mt-8 text-center text-gray-500 text-sm">
-          You've reached the end of the list
+          You&apos;ve reached the end of the list
         </div>
       )}
     </div>
