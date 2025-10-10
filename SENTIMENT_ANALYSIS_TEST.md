@@ -282,10 +282,10 @@ OpenAI API error: [details]
 ## 💰 Cost Monitoring
 
 **OpenAI API Costs:**
-- Model: `gpt-3.5-turbo`
-- Cost: ~$0.002 per 1K tokens
-- Average comment: ~100 tokens
-- **Cost per comment: ~$0.0002** (less than 1 cent)
+- Model: `gpt-4o-mini` (latest ChatGPT mini model)
+- Cost: ~$0.00015 per 1K input tokens, ~$0.0006 per 1K output tokens
+- Average comment: ~100 input tokens, ~10 output tokens
+- **Cost per comment: ~$0.00002** (60% cheaper than gpt-3.5-turbo!)
 
 **Monitor usage:**
 1. Go to: https://platform.openai.com/usage
@@ -293,9 +293,15 @@ OpenAI API error: [details]
 3. Set billing limits if needed
 
 **Estimated costs:**
-- 100 comments/day: ~$0.60/month
-- 1,000 comments/day: ~$6/month
-- 10,000 comments/day: ~$60/month
+- 100 comments/day: ~$0.06/month
+- 1,000 comments/day: ~$0.60/month
+- 10,000 comments/day: ~$6/month
+
+**Benefits of gpt-4o-mini:**
+- 60% cheaper than gpt-3.5-turbo
+- Faster response time
+- More accurate sentiment analysis
+- Latest model from OpenAI
 
 ---
 

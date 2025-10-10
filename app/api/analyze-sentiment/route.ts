@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
