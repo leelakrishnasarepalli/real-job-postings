@@ -88,20 +88,9 @@ export function JobsList({
         query = query.gte('trust_score', minScoreFilter)
       }
 
-      // Apply sorting
-      if (sortOption === 'hot') {
-        query = query.order('trust_score', { ascending: false }).order('created_at', { ascending: false })
-      } else if (sortOption === 'new') {
-        query = query.order('created_at', { ascending: false })
-      } else if (sortOption === 'top') {
-        query = query.order('trust_score', { ascending: false })
-      } else if (sortOption === 'fake') {
-        // For fake jobs, we'll fetch all and sort by downvotes client-side
-        query = query.order('created_at', { ascending: false })
-      }
-
-      // Pagination
+      // Fetch more jobs (sorted by created_at for now)
       const { data: newJobs, error } = await query
+        .order('created_at', { ascending: false })
         .range(jobs.length, jobs.length + JOBS_PER_PAGE - 1)
 
       if (error) throw error
@@ -127,12 +116,33 @@ export function JobsList({
             ...job,
             voteCount,
             commentCount: commentCount || 0,
+            downvotes,
           }
         })
       )
 
-      setJobs([...jobs, ...jobsWithCounts])
-      setHasMore(jobsWithCounts.length === JOBS_PER_PAGE)
+      // Apply client-side sorting to new jobs
+      let sortedNewJobs = [...jobsWithCounts]
+
+      if (sortOption === 'hot') {
+        sortedNewJobs.sort((a, b) => {
+          const now = Date.now()
+          const aAge = (now - new Date(a.created_at).getTime()) / (1000 * 60 * 60)
+          const bAge = (now - new Date(b.created_at).getTime()) / (1000 * 60 * 60)
+          const aHotScore = (a.voteCount + a.commentCount * 0.5) / Math.pow(aAge + 2, 1.5)
+          const bHotScore = (b.voteCount + b.commentCount * 0.5) / Math.pow(bAge + 2, 1.5)
+          return bHotScore - aHotScore
+        })
+      } else if (sortOption === 'top') {
+        sortedNewJobs.sort((a, b) => b.voteCount - a.voteCount)
+      } else if (sortOption === 'fake') {
+        sortedNewJobs = sortedNewJobs.filter(job => job.downvotes > 0)
+        sortedNewJobs.sort((a, b) => b.downvotes - a.downvotes)
+      }
+      // 'new' is already sorted by created_at
+
+      setJobs([...jobs, ...sortedNewJobs])
+      setHasMore(sortedNewJobs.length === JOBS_PER_PAGE)
     } catch (error) {
       console.error('Error loading more jobs:', error)
     } finally {

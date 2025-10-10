@@ -58,21 +58,11 @@ export default async function JobsPage({
     query = query.gte('trust_score', minScore)
   }
 
-  // Apply sorting
-  if (sort === 'hot') {
-    query = query.order('trust_score', { ascending: false }).order('created_at', { ascending: false })
-  } else if (sort === 'new') {
-    query = query.order('created_at', { ascending: false })
-  } else if (sort === 'top') {
-    query = query.order('trust_score', { ascending: false })
-  } else if (sort === 'fake') {
-    // For fake jobs, fetch more to calculate downvotes and get top 50%
-    query = query.order('created_at', { ascending: false })
-  }
-
-  // Fetch jobs - more for 'fake' sorting
-  const limit = sort === 'fake' ? 100 : 10
-  const { data: jobs, error } = await query.limit(limit)
+  // Fetch all jobs first (we'll sort after calculating vote counts)
+  const fetchLimit = sort === 'fake' ? 100 : 50
+  const { data: jobs, error } = await query
+    .order('created_at', { ascending: false })
+    .limit(fetchLimit)
 
   if (error) {
     console.error('Error fetching jobs:', error)
@@ -104,16 +94,39 @@ export default async function JobsPage({
     })
   )
 
-  // Handle 'fake' sorting: show top 50% of most downvoted jobs
-  let finalJobs = jobsWithCounts
-  if (sort === 'fake' && jobsWithCounts.length > 0) {
-    // Filter jobs with at least 1 downvote
-    const jobsWithDownvotes = jobsWithCounts.filter(job => job.downvotes > 0)
-    // Sort by downvotes descending
+  // Apply sorting based on calculated values
+  let finalJobs = [...jobsWithCounts]
+
+  if (sort === 'hot') {
+    // Hot: Combination of votes, comments, and recency
+    finalJobs.sort((a, b) => {
+      const now = Date.now()
+      const aAge = (now - new Date(a.created_at).getTime()) / (1000 * 60 * 60) // hours
+      const bAge = (now - new Date(b.created_at).getTime()) / (1000 * 60 * 60)
+
+      // Reddit-style hot algorithm: (votes + comments) / (age + 2)^1.5
+      const aHotScore = (a.voteCount + a.commentCount * 0.5) / Math.pow(aAge + 2, 1.5)
+      const bHotScore = (b.voteCount + b.commentCount * 0.5) / Math.pow(bAge + 2, 1.5)
+
+      return bHotScore - aHotScore
+    })
+  } else if (sort === 'new') {
+    // New: Most recent first (already sorted by created_at)
+    finalJobs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  } else if (sort === 'top') {
+    // Top: Highest net votes (upvotes - downvotes)
+    finalJobs.sort((a, b) => b.voteCount - a.voteCount)
+  } else if (sort === 'fake') {
+    // Fake: Most downvoted jobs (top 50%)
+    const jobsWithDownvotes = finalJobs.filter(job => job.downvotes > 0)
     jobsWithDownvotes.sort((a, b) => b.downvotes - a.downvotes)
-    // Take top 50%
     const top50PercentCount = Math.ceil(jobsWithDownvotes.length * 0.5)
     finalJobs = jobsWithDownvotes.slice(0, Math.max(top50PercentCount, 10))
+  }
+
+  // Take only first 10 for initial display (except fake which already filtered)
+  if (sort !== 'fake') {
+    finalJobs = finalJobs.slice(0, 10)
   }
 
   const {
