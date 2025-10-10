@@ -7,7 +7,7 @@ export const jobPostingSchema = z.object({
   description: z.string().max(500).optional(),
   category: z.string().optional(),
   location: z.string().max(100).optional(),
-  job_type: z.enum(['remote', 'hybrid', 'onsite']).default('remote'),
+  job_type: z.enum(['remote', 'hybrid', 'onsite']),
 })
 
 export type JobPostingFormData = z.infer<typeof jobPostingSchema>
