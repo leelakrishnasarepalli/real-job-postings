@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/Toast'
 
 type CommentFormProps = {
   jobPostingId: string
@@ -30,6 +31,7 @@ export function CommentForm({
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  const { showToast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,10 +89,13 @@ export function CommentForm({
       if (insertError) throw insertError
 
       setContent('')
+      showToast('success', sentiment === 'negative' ? 'Comment posted and flagged as negative' : 'Comment posted successfully!')
       onSuccess?.()
       router.refresh()
     } catch (err: any) {
-      setError(err.message || 'Failed to post comment')
+      const errorMessage = err.message || 'Failed to post comment'
+      setError(errorMessage)
+      showToast('error', errorMessage)
     } finally {
       setIsSubmitting(false)
     }

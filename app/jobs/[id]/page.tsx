@@ -5,6 +5,48 @@ import { BookmarkButton } from '@/components/BookmarkButton'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: job } = await supabase
+    .from('job_postings')
+    .select('title, company, description, category, location')
+    .eq('id', id)
+    .single()
+
+  if (!job) {
+    return {
+      title: 'Job Not Found',
+    }
+  }
+
+  const description = job.description
+    ? job.description.substring(0, 160) + '...'
+    : `${job.title} at ${job.company}`
+
+  return {
+    title: `${job.title} at ${job.company}`,
+    description,
+    openGraph: {
+      title: `${job.title} at ${job.company}`,
+      description,
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${job.title} at ${job.company}`,
+      description,
+    },
+    keywords: [job.title, job.company, job.category, job.location, 'job posting', 'verified job'].filter(Boolean),
+  }
+}
 
 export default async function JobDetailPage({
   params,

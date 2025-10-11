@@ -6,10 +6,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { jobPostingSchema, type JobPostingFormData } from '@/lib/validations'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/Toast'
 
 export default function SubmitJobPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { showToast } = useToast()
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,9 +44,12 @@ export default function SubmitJobPage() {
       if (data.title) setValue('title', data.title)
       if (data.company) setValue('company', data.company)
       if (data.description) setValue('description', data.description)
+      showToast('success', 'Job details fetched successfully!')
     } catch (err) {
       console.error('Failed to fetch metadata:', err)
-      setError('Could not fetch job details. Please fill in manually.')
+      const errorMsg = 'Could not fetch job details. Please fill in manually.'
+      setError(errorMsg)
+      showToast('warning', errorMsg)
     } finally {
       setIsLoadingMetadata(false)
     }
@@ -102,9 +107,12 @@ export default function SubmitJobPage() {
 
       if (insertError) throw insertError
 
+      showToast('success', 'Job posted successfully!')
       router.push(`/jobs/${jobPosting.id}`)
     } catch (err: any) {
-      setError(err.message || 'Failed to submit job posting')
+      const errorMsg = err.message || 'Failed to submit job posting'
+      setError(errorMsg)
+      showToast('error', errorMsg)
     }
   }
 
