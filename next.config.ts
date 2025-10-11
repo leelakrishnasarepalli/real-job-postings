@@ -13,8 +13,6 @@ const nextConfig: NextConfig = {
   },
   // Enable React strict mode for better error detection
   reactStrictMode: true,
-  // Optimize production builds
-  swcMinify: true,
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['date-fns', 'lucide-react'],
