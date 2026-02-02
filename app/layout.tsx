@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
@@ -48,6 +49,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-W7P60KCWFQ"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-W7P60KCWFQ');
+        `}
+      </Script>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
